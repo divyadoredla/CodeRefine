@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeRefine | Generative AI Code Review</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
+        .gradient-bg { background: radial-gradient(circle at top right, #1e293b, #0f172a); }
+        .neon-border { border: 1px solid rgba(59, 130, 246, 0.5); }
+        .syntax-highlight { font-family: 'Courier New', Courier, monospace; }
+    </style>
+</head>
+<body class="gradient-bg text-gray-100 min-h-screen py-8">
+    <div class="max-w-6xl mx-auto px-4">
+        <!-- Header -->
+        <header class="mb-12 text-center">
+            <h1 class="text-5xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
+                CodeRefine
+            </h1>
+            <p class="text-gray-400 text-lg">Senior-Level Generative AI Code Review & Optimization</p>
+        </header>
+
+        <!-- Main Grid -->
+        <main class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Input Section -->
+            <section class="glass p-6 rounded-2xl shadow-2xl neon-border">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold flex items-center gap-2">
+                        <span class="p-2 bg-blue-500/20 rounded-lg">📝</span>
+                        Source Code
+                    </h2>
+                    <div class="flex gap-2">
+                        <select id="languageSelect" class="bg-gray-800 border-none rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500">
+                            <option value="">Auto-Detect</option>
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="cpp">C++</option>
+                            <option value="java">Java</option>
+                            <option value="go">Go</option>
+                        </select>
+                        <select id="modelSelect" class="bg-gray-800 border-none rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500">
+                            <option value="gemini">Gemini Pro</option>
+                            <option value="groq">Groq (LLaMA3)</option>
+                            <option value="huggingface">Hugging Face</option>
+                        </select>
+                    </div>
+                </div>
+
+                <textarea id="codeInput" 
+                    placeholder="Paste your source code here..." 
+                    class="w-full h-96 bg-gray-900/50 border border-gray-700/50 rounded-xl p-4 syntax-highlight text-sm text-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                ></textarea>
+
+                <div class="mt-6 flex items-center justify-between">
+                    <label class="flex items-center gap-2 cursor-pointer group">
+                        <input type="checkbox" id="explanationMode" class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <span class="text-sm text-gray-400 group-hover:text-blue-400 transition-colors">Beginner Mode</span>
+                    </label>
+                    <button id="reviewBtn" class="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg transform active:scale-95 transition-all">
+                        Review Code
+                    </button>
+                </div>
+            </section>
+
+            <!-- Output Section -->
+            <section class="space-y-6">
+                <!-- Quality Score Card -->
+                <div id="scoreCard" class="hidden glass p-6 rounded-2xl neon-border animate-fade-in">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-gray-400 text-sm font-medium uppercase tracking-wider">Quality Score</h3>
+                            <div class="flex items-baseline gap-2">
+                                <span id="qualityScore" class="text-4xl font-bold text-blue-400">0</span>
+                                <span class="text-gray-500">/ 10</span>
+                            </div>
+                        </div>
+                        <div class="w-16 h-16 rounded-full border-4 border-gray-800 flex items-center justify-center relative">
+                            <div id="scoreRing" class="absolute inset-0 rounded-full border-4 border-blue-500 rotate-[-90deg]" style="clip-path: polygon(50% 50%, -100% -100%, 200% -100%)"></div>
+                            <span id="scorePercent" class="text-xs font-bold">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Issues Card -->
+                <div id="issuesCard" class="hidden glass p-6 rounded-2xl neon-border">
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <span class="p-2 bg-red-500/20 rounded-lg">🐞</span>
+                        Detected Issues
+                    </h3>
+                    <div id="issuesList" class="space-y-3">
+                        <!-- Dynamic Issues -->
+                    </div>
+                </div>
+
+                <!-- Suggestions Card -->
+                <div id="suggestionsCard" class="hidden glass p-6 rounded-2xl neon-border">
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <span class="p-2 bg-emerald-500/20 rounded-lg">💡</span>
+                        Optimizations
+                    </h3>
+                    <div id="optimizationsList" class="space-y-4">
+                        <!-- Dynamic Optimizations -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Refactored Code Section -->
+        <section id="refactoredSection" class="hidden mt-8 glass p-6 rounded-2xl neon-border">
+            <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                <span class="p-2 bg-blue-500/20 rounded-lg">⚡</span>
+                Optimized Version
+            </h3>
+            <pre id="refactoredCode" class="syntax-highlight text-sm bg-gray-900/50 p-6 rounded-xl overflow-x-auto text-emerald-300 border border-emerald-500/20"></pre>
+            
+            <div class="mt-6 p-4 bg-blue-500/5 rounded-xl border border-blue-500/10">
+                <h4 class="font-bold text-blue-400 mb-2">Expert Breakdown</h4>
+                <p id="simpleExplanation" class="text-gray-300 leading-relaxed"></p>
+            </div>
+        </section>
+
+        <!-- Loader -->
+        <div id="loader" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div class="text-center">
+                <div class="inline-block w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <p class="mt-4 font-bold text-blue-400 animate-pulse">Analyzing Code Architecture...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
